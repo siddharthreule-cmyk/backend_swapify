@@ -1,3 +1,24 @@
+# 1. IMPORTS (Always at the very top)
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+
+# 2. INITIALIZATION (Must happen before any @app.route!)
+app = Flask(__name__)
+CORS(app)  # Attaches CORS protection to your 'app' object
+
+# 3. YOUR ROUTES (In the middle)
+@app.route('/')
+def home():
+    return "Swapify backend is running smoothly!"
+
+@app.route('/login', methods=['POST'])
+def login():
+    # Your login logic here...
+    return jsonify({"status": "success"})
+
+# 4. SERVER RUNNER (At the very bottom, if you have one)
+if __name__ == '__main__':
+    app.run()
 from __future__ import annotations
 import json
 from datetime import datetime
@@ -258,3 +279,8 @@ def api_add_review() -> Any:
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+ # In your main Python file (app.py or main.py)
+
+@app.route('/')
+def home():
+    return "Swapify backend is running smoothly!"
