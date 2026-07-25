@@ -1,41 +1,26 @@
-# LINE 1: Must be at the absolute top!
 from __future__ import annotations
 
-# LINE 2+: Regular imports
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-
-# App setup
-app = Flask(__name__)
-CORS(app)
-
-# --- rest of your backend routes below ---
-
-# 3. YOUR ROUTES (In the middle)
-@app.route('/')
-def home():
-    return "Swapify backend is running smoothly!"
-
-@app.route('/login', methods=['POST'])
-def login():
-    # Your login logic here...
-    return jsonify({"status": "success"})
-
-# 4. SERVER RUNNER (At the very bottom, if you have one)
-if __name__ == '__main__':
-    app.run()
-
 import json
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
 from uuid import uuid4
-from flask import Flask, jsonify, request, send_from_directory, abort
 
+from flask import Flask, abort, jsonify, request, send_from_directory
+from flask_cors import CORS
+
+# --- APP SETUP & CORS ---
 app = Flask(__name__, static_folder='.', static_url_path='')
+CORS(app)  # Enables CORS so GitHub Pages can make requests to this backend
+
 DB_PATH = Path('swapify_db.json')
 ADMIN_PASSWORD = '12367'
-EXPENSIVE_ITEMS = ['car', 'house', 'yacht', 'jet', 'plane', 'boat', 'diamonds', 'diamond', 'gold', 'jewellery', 'jewelry', 'submarine', 'bunker', 'island', 'castle', 'masterpiece', 'art']
+EXPENSIVE_ITEMS = [
+    'car', 'house', 'yacht', 'jet', 'plane', 'boat', 'diamonds', 'diamond',
+    'gold', 'jewellery', 'jewelry', 'submarine', 'bunker', 'island', 'castle',
+    'masterpiece', 'art'
+]
 
 DEFAULT_DB = {
     'items': [],
@@ -43,6 +28,7 @@ DEFAULT_DB = {
 }
 
 
+# --- DATABASE HELPERS ---
 def load_db() -> Dict[str, Any]:
     if not DB_PATH.exists():
         save_db(DEFAULT_DB.copy())
@@ -73,19 +59,25 @@ def find_account(accounts: list[dict], username: str) -> dict | None:
     return next((acc for acc in accounts if normalize_username(acc.get('username')) == normalized), None)
 
 
+# --- HEALTH & STATIC ROUTES ---
 @app.route('/')
 @app.route('/index.html')
 def serve_index() -> Any:
-    return send_from_directory('.', 'index.html')
+    if Path('index.html').exists():
+        return send_from_directory('.', 'index.html')
+    return "Swapify backend is running smoothly!"
 
 
 @app.route('/<path:path>')
 def serve_file(path: str) -> Any:
     if Path(path).exists():
         return send_from_directory('.', path)
-    return send_from_directory('.', 'index.html')
+    if Path('index.html').exists():
+        return send_from_directory('.', 'index.html')
+    return "Swapify backend is running smoothly!"
 
 
+# --- ITEM ENDPOINTS ---
 @app.route('/api/items', methods=['GET'])
 def api_get_items() -> Any:
     db = load_db()
@@ -149,6 +141,7 @@ def api_add_interest(listing_id: str) -> Any:
     return jsonify(item)
 
 
+# --- ACCOUNT & AUTH ENDPOINTS ---
 @app.route('/api/accounts', methods=['GET'])
 def api_get_accounts() -> Any:
     db = load_db()
@@ -282,10 +275,8 @@ def api_add_review() -> Any:
     return jsonify(item)
 
 
+# --- SERVER RUNNER ---
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
- # In your main Python file (app.py or main.py)
-
-@app.route('/')
-def home():
-    return "Swapify backend is running smoothly!"
+    # Dynamically grabs Render's PORT environment variable, or defaults to 5000
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
