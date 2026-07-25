@@ -24,7 +24,7 @@ def login():
 # 4. SERVER RUNNER (At the very bottom, if you have one)
 if __name__ == '__main__':
     app.run()
-from __future__ import annotations
+
 import json
 from datetime import datetime
 from pathlib import Path
