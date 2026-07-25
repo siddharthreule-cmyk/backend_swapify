@@ -1,10 +1,15 @@
-# 1. IMPORTS (Always at the very top)
+# LINE 1: Must be at the absolute top!
+from __future__ import annotations
+
+# LINE 2+: Regular imports
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-# 2. INITIALIZATION (Must happen before any @app.route!)
+# App setup
 app = Flask(__name__)
-CORS(app)  # Attaches CORS protection to your 'app' object
+CORS(app)
+
+# --- rest of your backend routes below ---
 
 # 3. YOUR ROUTES (In the middle)
 @app.route('/')
